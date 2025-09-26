@@ -16,4 +16,9 @@
     "url": "https://github.com/WilleamM/first_app/issues"
   },
   "homepage": "https://github.com/WilleamM/first_app#readme"
+    ,
+    "workspaces": [
+        "packages/*"
+    ]
+
 }
