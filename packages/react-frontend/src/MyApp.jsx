@@ -1,12 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import Table from "./Table";
 
+// <Table characterData={characters}/> where characters is being passed to table as a prop
 function MyApp() {
-  return (
+    const [characters, setCharacters] = useState([
+        {
+            name: "Charlie",
+            job: "Janitor"
+        },
+        {
+            name: "Mac",
+            job: "Bouncer"
+        },
+        {
+            name: "Dee",
+            job: "Aspring actress"
+        },
+        {
+            name: "Dennis",
+            job: "Bartender"
+        }
+    ]);
+
+    function removeOneCharacter(index){
+        const updated = characters.filter((character, i) => {
+            return i !== index ;
+        });
+        setCharacters(updated);
+    }
+
+    return (
     <div className="container">
-      <h1>Hello, React!</h1>
-      <Table />
+        <Table
+        characterData={characters}
+        removeCharacter={removeOneCharacter}
+        />
     </div>
-  );
+    );
 }
 export default MyApp;
