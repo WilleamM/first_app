@@ -24,8 +24,14 @@ const users = {
 app.get("/", (req, res) => {
     // req is what we were given
     // res is what we will send back
-    res.send("Hello World!");
+    return res.send("Hello World!");
 });
+
+
+
+
+
+
 
 const findUserByName = (name) => {
     return users["users_list"].filter(
@@ -45,15 +51,19 @@ app.get("/users", (req, res) => {
     if (name != undefined && job != undefined) {
         let result = findUserByNameAndJob(name, job);
         result = {users_list: result}; // setting result to json grabbing user data with that name
-        res.send(result);
+        return res.send(result);
     }
     if (name != undefined){
       let result = findUserByName(name);
       result = {users_list: result};
-      res.send(result);
+      return res.send(result);
     }
-    res.send(users);
+    return res.send(users);
 })
+
+
+
+
 
 
 // find user with specific id
@@ -71,15 +81,17 @@ app.get("/users/:id", (req, res) => {
     }
 });
 
+const makeId = () => Math.random().toString(36).slice(2, 8);
+
 const addUser = (user) => {
   users["users_list"].push(user); // add the new user to the end of the array
   return user;
 }
 
 app.post("/users", (req, res) => {
-  const userToAdd = req.body; // the incoming data
-  addUser(userToAdd);
-  res.send();
+  const userToAdd = req.body;
+  const created = addUser({ ...userToAdd, id: makeId() });
+  return res.status(201).send(created); // returns the object we created
 });
 
 
@@ -96,7 +108,7 @@ app.delete("/users/:id", (req, res) => {
   if (!deleted){
     res.status(404).send("Resource not found");
   }else{
-    return res.send("User deleted!");
+    return res.status(204).send("User deleted!");
   }
 });
 
