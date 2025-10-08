@@ -58,6 +58,23 @@ function MyApp() {
             .catch((error) => console.log(error));
     }
 
+    function removeOneCharacter(id) {
+    const promise = fetch(`http://localhost:8000/users/${id}`, { 
+    method: "DELETE",
+    headers: {
+        "Content-Type": "application/json", // tells server that body contains JSON
+        },}).then((res) => {
+            if (res.status === 204) {
+                setCharacters((prev) => prev.filter((user) => user.id !== id));
+            }else if (res.status === 404) {
+                console.log("resource not found, no object was deleted");
+            }else{
+                throw new Error(`Unexpected status ${res.status}`);
+            }
+        })
+        .catch((err) => console.log(err));
+    }
+
     return (
     <div className="container">
         <Table
