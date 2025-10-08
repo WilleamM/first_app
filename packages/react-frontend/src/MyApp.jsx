@@ -1,10 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Table from "./Table";
 import Form from "./Form"
 
 // <Table characterData={characters}/> where characters is being passed to table as a prop
 function MyApp() {
     const [characters, setCharacters] = useState([]);
+
+    useEffect(() => {
+        fetchUsers() 
+            .then((res) => res.json())
+            .then((json) => setCharacters(json["users_list"]))
+            .catch((error) => { console.log(error); });
+    }, [] );
+
+    function fetchUsers() { // fetches all the data using the GET 
+        const promise = fetch("http://localhost:8000/users");
+        return promise;
+    }
 
     function removeOneCharacter(index){
         const updated = characters.filter((character, i) => {
