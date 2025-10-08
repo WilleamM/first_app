@@ -18,6 +18,19 @@ function MyApp() {
         return promise;
     }
 
+    // Like with the GET request, we don't wait for our POST to come back, but return a promise which will be fulfilled when it does
+    function postUser(person) {
+        const promise = fetch("Http://localhost:8000/users", {
+        method: "POST", // default is GET
+        headers: {
+            "Content-Type": "application/json", // tells server that body contains JSON
+        },
+        body: JSON.stringify(person), // puts the persons data into the request & stringify to be able to send it
+        });
+
+    return promise;
+    }    
+
     function removeOneCharacter(index){
         const updated = characters.filter((character, i) => {
             return i !== index ;
@@ -25,8 +38,12 @@ function MyApp() {
         setCharacters(updated);
     }
 
-    function updateList(person){
-        setCharacters([...characters, person]);
+    function updateList(person) { 
+        postUser(person) // only updates the table if the post call is successful
+        .then(() => setCharacters([...characters, person])) // do it with promise that its right
+        .catch((error) => {
+            console.log(error);
+        })
     }
 
     return (
