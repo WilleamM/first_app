@@ -1,21 +1,12 @@
 import express from "express";
 import cors from "cors";
+import userServices from "./user-services.js";
+
 // npx nodemon backend.js
 const app = express();
 const port = 8000;
 app.use(cors());
 app.use(express.json());
-
-
-const users = {
-  users_list: [
-    { id: "xyz789", name: "Charlie", job: "Janitor" },
-    { id: "abc123", name: "Mac",     job: "Bouncer" },
-    { id: "ppp222", name: "Mac",     job: "Professor" },
-    { id: "yat999", name: "Dee",     job: "Aspring actress" },
-    { id: "zap555", name: "Dennis",  job: "Bartender" }
-  ]
-};
 
 // api endpoint
 // .get has 2 parameters:
@@ -27,91 +18,61 @@ app.get("/", (req, res) => {
     return res.send("Hello World!");
 });
 
-
-
-
-
-
-
-const findUserByName = (name) => {
-    return users["users_list"].filter(
-        (user) => user["name"] === name
-    );
-};
-const findUserByNameAndJob = (name, job) => {
-    return users["users_list"].filter(
-        (user) => user["name"] === name && user["job"] === job
-    );
-};
-
-// sends users list, if name/job is req, then looks for user with that name
+// GET /users?name=...&job=...
+// (Covers: all users, by name only, by job only, by name+job)
 app.get("/users", (req, res) => {
     const name = req.query.name;
     const job = req.query.job;
-    if (name != undefined && job != undefined) {
-        let result = findUserByNameAndJob(name, job);
-        result = {users_list: result}; // setting result to json grabbing user data with that name
-        return res.send(result);
-    }
-    if (name != undefined){
-      let result = findUserByName(name);
-      result = {users_list: result};
-      return res.send(result);
-    }
-    return res.send(users);
-})
-
-
-
-
-
-
-// find user with specific id
-const findUserById = (id) => 
-    // .find instead of filter because there is only one unique id we're looking for
-    users["users_list"].find((user) => user["id"] === id);
-
+    userServices.getUsers(name, job)
+    .then((users) => res.send({ users_list: users}))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Failed to fetch the users")
+    });
+});
+// GET /users/:id
 app.get("/users/:id", (req, res) => {
-    const id = req.params.id;
-    let result = findUserById(id);
-    if (result == undefined){
-        res.status(404).send("Resource not found");
-    } else {
-        res.send(result);
-    }
+    const id = req.params.id
+    userServices.findUserById(id)
+    .then((user) => {
+      if (!user) return res.status(404).send("User not found")
+        return res.send(user); // if user exists, return the user
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(400).send("invalid id");
+    });
 });
 
-const makeId = () => Math.random().toString(36).slice(2, 8);
-
-const addUser = (user) => {
-  users["users_list"].push(user); // add the new user to the end of the array
-  return user;
-}
-
+// POST /users/
 app.post("/users", (req, res) => {
-  const userToAdd = req.body;
-  const created = addUser({ ...userToAdd, id: makeId() });
-  return res.status(201).send(created); // returns the object we created
+    const { name, job } = req.body
+    if (!name || !job) return res.status(400).send("name and job are required");
+
+    userServices.addUser({ name, job })
+    .then((createdUser) => res.status(201).send(createdUser))
+    .catch((err) => {
+      console.error(err);
+      res.status(400).send(err.message ?? "Failed to create user");
+    });
+
 });
 
-
-const deleteUserById = (id) => {
-  const current_id = users["users_list"].findIndex((u) => u["id"] === id)
-  if (current_id === -1) return false;
-  users["users_list"].splice(current_id, 1);
-  return true;
-};
-
+// DELETE /users/:id
 app.delete("/users/:id", (req, res) => {
   const id = req.params.id;
-  const deleted = deleteUserById(id);
-  if (!deleted){
-    res.status(404).send("Resource not found");
-  }else{
+  userServices.deleteUserById(id)
+  .then((deletedUser) => {
+    if(!deletedUser){
+      return res.status(404).send("User not found");
+    }
     return res.status(204).send("User deleted!");
-  }
+  })
+  .catch((err) => {
+    console.error(err);
+    res.status(400).send("Failed to delete user");
+  });
 });
-
 
 
 app.listen(port, () => {
