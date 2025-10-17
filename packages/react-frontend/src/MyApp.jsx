@@ -31,14 +31,14 @@ function MyApp() {
         return promise;
     }    
 
-    function removeOneCharacter(id) {
-        const promise = fetch(`http://localhost:8000/users/${id}`, { 
+    function removeOneCharacter(_id) {
+        const promise = fetch(`http://localhost:8000/users/${_id}`, { 
         method: "DELETE",
         headers: {
             "Content-Type": "application/json", // tells server that body contains JSON
         },}).then((res) => {
-                if (res.status === 204) {
-                    setCharacters((prev) => prev.filter((user) => user.id !== id));
+                if (res.status === 204) { // 204 == success
+                    setCharacters((prev) => prev.filter((user) => user._id !== _id));
                 }else if (res.status === 404) {
                     console.log("resource not found, no object was deleted");
                 }else{
