@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
-// brew services start mongodb-community@8.2
-// brew services stop mongodb-community@8.2
+// brew services start mongodb-community
+// brew services stop mongodb-community
 
 
 const UserSchema = new mongoose.Schema(
